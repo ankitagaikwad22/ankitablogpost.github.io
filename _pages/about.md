@@ -1,19 +1,82 @@
 ---
 permalink: /
-title: "Academic Pages is a ready-to-fork GitHub Pages template for academic personal websites"
+title: "Separable Physics-Informed Neural Networks"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
 
-This is the front page of a website that is powered by the [Academic Pages template](https://github.com/academicpages/academicpages.github.io) and hosted on GitHub pages. [GitHub pages](https://pages.github.com) is a free service in which websites are built and hosted from code and data stored in a GitHub repository, automatically updating when a new commit is made to the repository. This template was forked from the [Minimal Mistakes Jekyll Theme](https://mmistakes.github.io/minimal-mistakes/) created by Michael Rose, and then extended to support the kinds of content that academics have: publications, talks, teaching, a portfolio, blog posts, and a dynamically-generated CV. Incidentally, these same features make it a great template for anyone that needs to show off a professional template!
+Welcome to my blog post describing and explaining the paper "Separable Physics-Informed Neural Networks" by Cho et al., which was presented at NeurIPS 2023. This research describes a unique and scalable method for solving PDEs that restructures how neural networks model multidimensional input. As someone who is very interested in the convergence of deep learning and computational physics, I found SPINNs to be a novel and interesting approach to addressing the bottlenecks of previous PINN structures. It demonstrates how traditional concepts such as variable separation and tensor decomposition may be combined with neural networks to provide faster, more efficient scientific computing models.
+This blog article is based on my reading of the research, my seminar presentation on SPINNs, and comparisons with other comparable methods such as PINNs, Causal PINNs, and low-rank neural PDE solvers. I've endeavored to make the concepts comprehensible even if you're not deeply into numerical methods or theoretical machine learning.
+In this blog post, we examine Separable Physics-Informed Neural Networks (SPINNs), a sophisticated method for applying machine learning to the solution of high-dimensional partial differential equations (PDEs). The exponential cost of sampling and differentiation in high dimensions affects the scalability of traditional Physics-Informed Neural Networks (PINNs). By segmenting the network according to input dimensions and utilizing forward-mode automatic differentiation, SPINNs provide a straightforward yet effective redesign. When combined, these two concepts and result in significant increases in speed and memory effectiveness. With an emphasis on the physics-inspired motivations and little mathematical overhead, this post seeks to make the concepts underlying SPINNs understandable and approachable. Let’s decompose.
 
- You can fork [this template](https://github.com/academicpages/academicpages.github.io) right now, modify the configuration and Markdown files, add your own PDFs and other content, and have your own site for free, with no ads!
 
-A data-driven personal website
+INTRODUCTION
 ======
-Like many other Jekyll-based GitHub Pages templates, Academic Pages makes you separate the website's content from its form. The content & metadata of your website are in structured Markdown files, while various other files constitute the theme, specifying how to transform that content & metadata into HTML pages. You keep these various Markdown (.md), YAML (.yml), HTML, and CSS files in a public GitHub repository. Each time you commit and push an update to the repository, the [GitHub pages](https://pages.github.com/) service creates static HTML pages based on these files, which are hosted on GitHub's servers free of charge.
+
+Partial differential equations (PDEs) are a fundamental problem in computational science and engineering. PDEs are used in a variety of applications, including fluid flow and electromagnetic field simulations, as well as modeling quantum systems and weather patterns.  
+Traditional methods to PDE solutions are Finite Element Methods or Finite Difference Methods which require lots of computation and it struggle with high dimensions. SO it was so challenging for In real-world scenarios, especially in high dimensions or complex geometries, classical solvers become too expensive or impractical.
+
+In recent years, Physics-Informed Neural Networks (PINNs) have gained popularity as a mesh-free, data-efficient alternative. PINNs learn PDE solutions by explicitly encoding physical rules into a neural network's loss function. They operate exceptionally well for many situations, particularly in low dimensions, and require no labeled data. . Despite its potential, PINNs encounter significant challenges when used to high-dimensional PDEs. The number of points required to adequately record the physics explodes, and computing gradients using reverse-mode automated differentiation becomes prohibitively expensive. 
+
+This is where the study "Separable Physics-Informed Neural Networks" comes in. SPINNs address the fundamental constraints of PINNs by making two innovative modifications: 
+1. A separable architecture uses small MLPs for each input dimension and a low-rank tensor product to assemble the full solution. 
+2. Forward-mode automatic differentiation is ideal for computing multiple output derivatives with few inputs, a common scenario in physics problems.
+These changes may appear modest, but their influence is profound: SPINNs can achieve up to 62× speedups, reduce memory utilization by 29×, and handle PDEs in up to (3+1)D utilizing commodity GPUs, all while maintaining or enhancing accuracy.
+
+
+
+What Are PINNs and Where Do They Struggle? 
+======
+
+A PINN is a neural network that learns a function u(x) satisfying a PDE by minimizing the residuals of the PDE and initial/boundary conditions using automatic differentiation (AD).
+PINNs approximate the solution u(x) to a PDE by minimizing 
+• Residual loss using differential equation. 
+• Losses due to initial and boundary conditions. 
+These are enforced using automatic differentiation (often reverse-mode) and trained with standard gradient descent. These models are mesh-free, data-efficient (unsupervised), and can solve both forward and inverse problems. 
+
+However, the cost of analyzing the network and computing gradients rises considerably as dimensionality increases. To solve PDEs with finer grids or higher dimensions, PINNs require 
+• a large number of collocation points. 
+• Cannot handle large training sets on single gpu
+• they face high computational and memory costs 
+• they suffer from slow convergence.
+These scalability limits are well-documented [1, 3]. SPINNs confront things head on. 
+
+
+Introducing SPINNS
+======
+
+So to overcome all the problems researchers comes with a solution i.e SPINNS- which stands for Separable Physics-Informed Neural Networks.
+It's a new way to structure and train PINNs that:
+•	Handles multi-dimensional PDEs more efficiently
+•	Allows using more collocation points (>10 million!) even on a single GPU
+•	Is much faster and more accurate than traditional PINNs
+
+To understand why SPINN is so quick, we must first consider how derivatives are produced in deep learning – especially, by automatic differentiation. There are two major modes:
+
+Reverse-Mode AD
+Reverse-Mode AD (used in backpropagation) is ideal for functions with multiple inputs and a single output (e.g., loss functions). It operates by first performing a forward pass to compute outputs, followed by a backward pass to calculate gradients with respect to inputs. This is useful for training neural networks that require the gradient of a scalar loss with respect to all model parameters.
+Forward-Mode AD:
+Forward-Mode AD works best for functions with few inputs and many outputs, such as computing derivatives of solutions with respect to input coordinates in PDEs. Forward-mode AD computes these derivatives immediately during the forward pass, making it more efficient when assessing PDE residuals.
+
+In SPINN, the number of input variables (coordinates) is minimal (for example, time and space), but the number of outputs (solution evaluations at various points) is huge, making forward-mode AD the best fit.
+
+
+
+SPINN Architecture
+======
+
+
+
+
+
+
+
+
+
+
+
 
 Many of the features of dynamic content management systems (like Wordpress) can be achieved in this fashion, using a fraction of the computational resources and with far less vulnerability to hacking and DDoSing. You can also modify the theme to your heart's content without touching the content of your site. If you get to a point where you've broken something in Jekyll/HTML/CSS beyond repair, your Markdown files describing your talks, publications, etc. are safe. You can rollback the changes or even delete the repository and start over - just be sure to save the Markdown files! You can also write scripts that process the structured data on the site, such as [this one](https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.ipynb) that analyzes metadata in pages about talks to display [a map of every location you've given a talk](https://academicpages.github.io/talkmap.html).
 
