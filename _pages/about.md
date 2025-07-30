@@ -7,8 +7,11 @@ redirect_from:
   - /about.html
 ---
 
+
 Welcome to my blog post describing and explaining the paper "Separable Physics-Informed Neural Networks" by Cho et al., which was presented at NeurIPS 2023. This research describes a unique and scalable method for solving PDEs that restructures how neural networks model multidimensional input. As someone who is very interested in the convergence of deep learning and computational physics, I found SPINNs to be a novel and interesting approach to addressing the bottlenecks of previous PINN structures. It demonstrates how traditional concepts such as variable separation and tensor decomposition may be combined with neural networks to provide faster, more efficient scientific computing models.
+
 This blog article is based on my reading of the research, my seminar presentation on SPINNs, and comparisons with other comparable methods such as PINNs, Causal PINNs, and low-rank neural PDE solvers. I've endeavored to make the concepts comprehensible even if you're not deeply into numerical methods or theoretical machine learning.
+
 In this blog post, we examine Separable Physics-Informed Neural Networks (SPINNs), a sophisticated method for applying machine learning to the solution of high-dimensional partial differential equations (PDEs). The exponential cost of sampling and differentiation in high dimensions affects the scalability of traditional Physics-Informed Neural Networks (PINNs). By segmenting the network according to input dimensions and utilizing forward-mode automatic differentiation, SPINNs provide a straightforward yet effective redesign. When combined, these two concepts and result in significant increases in speed and memory effectiveness. With an emphasis on the physics-inspired motivations and little mathematical overhead, this post seeks to make the concepts underlying SPINNs understandable and approachable. Let’s decompose.
 
 
@@ -30,17 +33,26 @@ These changes may appear modest, but their influence is profound: SPINNs can ach
 What Are PINNs and Where Do They Struggle? 
 ======
 
+
 A PINN is a neural network that learns a function u(x) satisfying a PDE by minimizing the residuals of the PDE and initial/boundary conditions using automatic differentiation (AD).
 PINNs approximate the solution u(x) to a PDE by minimizing 
-• Residual loss using differential equation. 
+
+• Residual loss using differential equation.
+
 • Losses due to initial and boundary conditions. 
+
 These are enforced using automatic differentiation (often reverse-mode) and trained with standard gradient descent. These models are mesh-free, data-efficient (unsupervised), and can solve both forward and inverse problems. 
 
 However, the cost of analyzing the network and computing gradients rises considerably as dimensionality increases. To solve PDEs with finer grids or higher dimensions, PINNs require 
+
 • a large number of collocation points. 
+
 • Cannot handle large training sets on single gpu
+
 • they face high computational and memory costs 
+
 • they suffer from slow convergence.
+
 These scalability limits are well-documented [1, 3]. SPINNs confront things head on. 
 
 
@@ -49,8 +61,11 @@ Introducing SPINNS
 
 So to overcome all the problems researchers comes with a solution i.e SPINNS- which stands for Separable Physics-Informed Neural Networks.
 It's a new way to structure and train PINNs that:
+
 •	Handles multi-dimensional PDEs more efficiently
+
 •	Allows using more collocation points (>10 million!) even on a single GPU
+
 •	Is much faster and more accurate than traditional PINNs
 
 To understand why SPINN is so quick, we must first consider how derivatives are produced in deep learning – especially, by automatic differentiation. There are two major modes:
